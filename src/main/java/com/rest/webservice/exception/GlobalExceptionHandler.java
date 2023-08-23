@@ -8,7 +8,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.time.LocalDateTime;
@@ -16,7 +15,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 
 @ControllerAdvice
-public class CustomisedExceptionHandler extends ResponseEntityExceptionHandler
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler
 {
 
     @ExceptionHandler(Exception.class)
@@ -25,6 +24,8 @@ public class CustomisedExceptionHandler extends ResponseEntityExceptionHandler
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+
+    //Thrown when delete request is called at non-existing ID in user service
     @ExceptionHandler(NoSuchElementException.class)
     public final ResponseEntity<Object> handleUserNotFoundException(Exception ex, WebRequest request){
         ErrorDetails errorDetails=new ErrorDetails(LocalDateTime.now(),ex.getMessage(),request.getDescription(false));

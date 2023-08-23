@@ -7,35 +7,36 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/functional")
 public class FunctionalProgrammingController
 {
     @Autowired
-    private FunctionalProgrammingService service;
+    private FunctionalProgrammingService functionalProgrammingServiceservice;
 
     @GetMapping("/even")
     public List<Integer> getEven()
     {
-        return service.evenCheck();
+        return functionalProgrammingServiceservice.evenCheck();
     }
 
     @GetMapping("/remainder")
-    public Integer getRemainder()
+    public Map<Integer, Integer> getRemainder()
     {
-        return service.getRemainders();
+        return functionalProgrammingServiceservice.getRemainders();
     }
 
     @GetMapping("/even_sum")
     public Integer getEvenSum()
     {
-        return service.sumEven();
+        return functionalProgrammingServiceservice.sumEven();
     }
 
     @GetMapping("/even_square")
     public List<Integer> getEvenSquare()
     {
-        return service.evenSquare();
+        return functionalProgrammingServiceservice.evenSquare();
     }
 }

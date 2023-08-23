@@ -3,7 +3,10 @@ package com.rest.webservice.controller;
 import com.rest.webservice.entity.User;
 import com.rest.webservice.service.UsersDAOService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import lombok.NonNull;
 import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -32,32 +35,31 @@ public class WebserviceController
         this.usersDAOService =usersDAOService;
     }
 
-    @GetMapping("/get_all")
+    //get all users
+    @GetMapping("/all")
     public List<User> getAllUsers()
     {
         return usersDAOService.getAllUsers();
     }
 
-    @GetMapping("/get_by_id")
-    public User getByID(@RequestParam int id)
+    //get user by id
+    @GetMapping("/{id}")
+    public User getByID(@PathVariable @NotNull int id)
     {
         return usersDAOService.findUserByID(id);
     }
 
-    @PostMapping("/add_user")
+    @PostMapping("/")
     public ResponseEntity<Object> addUser(@Valid @RequestBody User user)
     {
         usersDAOService.addUser(user);
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequestUri()
-                .path("/{id}")
-                .buildAndExpand(user.getId())
-                .toUri();
-        return ResponseEntity.created(location).build();
+        return ResponseEntity.status(201).build();
     }
 
-    @DeleteMapping("/delete_by_id")
-    public String delete_user(@RequestParam Integer id) {
+    //put and patch mapping remaining
+
+    @DeleteMapping("/{id}")
+    public String delete_user(@PathVariable @NotNull Integer id) {
         return usersDAOService.deleteUserByID(id);
     }
 
