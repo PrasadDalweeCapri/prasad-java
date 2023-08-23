@@ -4,14 +4,10 @@ import com.rest.webservice.entity.User;
 import com.rest.webservice.service.UsersDAOService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import lombok.NonNull;
-import org.springframework.data.crossstore.ChangeSetPersister;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -56,7 +52,12 @@ public class WebserviceController
         return ResponseEntity.status(201).build();
     }
 
-    //put and patch mapping remaining
+    //put
+    @PutMapping("/{id}")
+    public String putUserData(@PathVariable @NotNull Integer id, @RequestParam String name, @RequestParam LocalDate date)
+    {
+        return usersDAOService.updateUserByID(id, name, date);
+    }
 
     @DeleteMapping("/{id}")
     public String delete_user(@PathVariable @NotNull Integer id) {
