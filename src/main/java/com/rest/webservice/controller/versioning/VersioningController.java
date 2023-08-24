@@ -49,7 +49,7 @@ public class VersioningController {
     }
 
     @GetMapping(value = "/fetch", headers = "X-API-VERSION=2")
-    public Version fetchByParam2() {
+    public Version fetchByHeader2() {
         return new Version(2, "Header Based Versioning");
     }
 
