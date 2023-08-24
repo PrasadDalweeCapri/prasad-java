@@ -18,7 +18,7 @@ public class FunctionalProgrammingService
 {
     private final List<Integer> numbers=List.of(1,2,3,4,5,6,7,8);
 
-    private Predicate<Integer> isEven= numbers-> (numbers%2==0);
+    private final Predicate<Integer> isEven= numbers-> (numbers%2==0);
 
 
     //streams use multithreading therefore their elements have to be threadsafe, so local variables are generally atomic
@@ -37,6 +37,9 @@ public class FunctionalProgrammingService
     public Integer sumEven()
     {
         AtomicInteger x=new AtomicInteger(0);
+
+        // numbers.stream().filter(isEven).mapToInt().sum();
+
         numbers.stream()
                 .filter(isEven)
                 .forEach(num->x.addAndGet(num));

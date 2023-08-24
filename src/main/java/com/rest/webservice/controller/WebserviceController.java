@@ -52,11 +52,24 @@ public class WebserviceController
         return ResponseEntity.status(201).build();
     }
 
+    @GetMapping("/last-id")
+    public Integer getLastUserId()
+    {
+        return usersDAOService.getLastUserId();
+    }
+
+    @GetMapping("/count")
+    public Integer getUserCount()
+    {
+        return usersDAOService.getUserCount();
+    }
+
+
     //put
     @PutMapping("/{id}")
-    public String putUserData(@PathVariable @NotNull Integer id, @RequestParam String name, @RequestParam LocalDate date)
+    public String putUserData(@PathVariable @NotNull Integer id, @RequestBody User user)
     {
-        return usersDAOService.updateUserByID(id, name, date);
+        return usersDAOService.updateUserByID(id, user);
     }
 
     @DeleteMapping("/{id}")

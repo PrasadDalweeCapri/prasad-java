@@ -1,33 +1,29 @@
 package com.rest.webservice.service;
 
 import com.rest.webservice.entity.User;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 @Service
 public class UsersDAOService {
 
     //making a param static means that the value of param will be shared across all instances of the class
-    private static List<User> users=new ArrayList<>();
+    private final CopyOnWriteArrayList<User> users=new CopyOnWriteArrayList<>();
+//    private final List<User> users=new ArrayList<>();
 
     //making id thread safe: 3 ways-> Synchronized, Volatile, AtomicInteger
     //refer: https://www.geeksforgeeks.org/difference-between-atomic-volatile-and-synchronized-in-java/
-    private static volatile Integer id=0;
+    private static AtomicInteger id=new AtomicInteger(0);
 
-    //static block is a block that executes first time the class is loaded in memory
-    static {
-        users.add(new User(++id,"Adam", LocalDate.of(2000,12,2)));
-        users.add(new User(++id,"Badam",LocalDate.of(2001,8,12)));
-        users.add(new User(++id,"Chadam",LocalDate.of(2002,1,11)));
-        users.add(new User(++id, "Dadam", LocalDate.parse("2000-02-21")));
-    }
+    public Integer getLastUserId(){return id.get();}
 
+    public Integer getUserCount(){return users.size();}
     public List<User> getAllUsers()
     {
         return users;
@@ -38,11 +34,11 @@ public class UsersDAOService {
         return users.stream().filter(user -> user.getId().equals(id)).findFirst().get();
     }
 
-    public User addUser(User user)
+
+    public void addUser(User user)
     {
-        user.setId(++id);
+        user.setId(id.getAndIncrement());
         users.add(user);
-        return user;
     }
 
     public String deleteUserByID(Integer id) {
@@ -52,12 +48,10 @@ public class UsersDAOService {
         return "User Removed";
     }
 
-    public String updateUserByID(Integer id, String name, LocalDate date)
+    public String updateUserByID(Integer id, User user)
     {
-        users.get(id).setName(name);
-        users.get(id).setDate(date);
-        User user1 = users.get(id);
-        System.out.println("id"+user1.getId()+" name:"+user1.getName()+" date"+user1.getDate());
+        users.get(id).setName(user.getName());
+        users.get(id).setDate(user.getDate());
         return "User Updated";
     }
 }
