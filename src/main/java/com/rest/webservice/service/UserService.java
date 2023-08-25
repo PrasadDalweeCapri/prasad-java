@@ -1,31 +1,31 @@
 package com.rest.webservice.service;
 
+import com.rest.webservice.dto.UserRequest;
 import com.rest.webservice.entity.UserDb;
-import com.rest.webservice.repository.UsersDbRepository;
+import com.rest.webservice.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
 @Slf4j
-public class UsersDbService {
+@RequiredArgsConstructor
+public class UserService {
 
-    @Autowired
-    private UsersDbRepository usersDbRepository;
+    private final UserRepository usersDbRepository;
 
-    public ArrayList<UserDb> getAllUsers() {
-        ArrayList<UserDb> users = new ArrayList<>();
+    public List<UserDb> getAllUsers() {
         try {
-            usersDbRepository.findAll().forEach(users::add);
+            return usersDbRepository.findAll();
         } catch (Throwable t) {
             log.error("Error occurred while retrieving all users, error:{}", t.getMessage());
-            throw new RuntimeException();
+            throw new RuntimeException("Error occurred.");
         }
-        return users;
     }
 
     public UserDb getById(Integer id) {
@@ -38,8 +38,8 @@ public class UsersDbService {
                 throw new NoSuchElementException();
             }
         } catch (NoSuchElementException e) {
-            log.error("id doesn't exist, error:{}", e.getMessage());
-            throw new NoSuchElementException("Invalid id.");
+            log.error("user doesn't exist with id:{}, error:{}",id, e.getMessage());
+            throw new NoSuchElementException(new StringBuilder("Invalid id:").append(id.toString()).toString());
         } catch (Throwable t) {
             log.error("Error Occurred while finding user with id: {}, error:{}", id, t.getMessage());
             throw new RuntimeException("Error occurred.");
@@ -51,9 +51,9 @@ public class UsersDbService {
     public String addNewUser(UserDb user) {
         try {
             usersDbRepository.save(user);
-            log.info("New User Added.");
+            log.info("New user added with id:{}",user.getId());
         } catch (Throwable t) {
-            log.error("Error occurred while saving user details, error:{}", t.getMessage());
+            log.error("Error occurred while saving user details with data:{}, error:{}",user, t.getMessage());
             throw new RuntimeException("Error Occurred");
         }
         return "User added.";
@@ -65,10 +65,10 @@ public class UsersDbService {
                 throw new NoSuchElementException();
             }
             usersDbRepository.deleteById(id);
-            log.info("User with id={} Deleted", id);
+            log.info("User with id:{} Deleted", id);
         } catch (NoSuchElementException e) {
             log.error("id doesn't exist, error:{}", e.getMessage());
-            throw new NoSuchElementException("Invalid id.");
+            throw new NoSuchElementException(new StringBuilder("Invalid id:").append(id.toString()).toString());
         } catch (Throwable t) {
             log.error("Error occurred while deleting user, error:{}", t.getMessage());
             throw new RuntimeException("Error Occurred");
@@ -77,26 +77,19 @@ public class UsersDbService {
         return "User Deleted.";
     }
 
-    public String updateUser(Integer id, UserDb userDb) {
+    public String updateUser(Integer id, UserRequest user) {
         try {
-            Optional<UserDb> userOptional = usersDbRepository.findById(id);
-            if (userOptional.isPresent()) {
-                UserDb user = userOptional.get();
-                if(!userDb.getName().isBlank()) {
-                    user.setName(userDb.getName());
-                }
-                if(userDb.getDate()!=null)
-                {user.setDate(userDb.getDate());}
-                usersDbRepository.save(user);
-                log.info("User details updated.");
-            } else {
-                throw new NoSuchElementException();
-            }
+            Optional<UserDb> userOptional = Optional.ofNullable(usersDbRepository.findById(id).orElseThrow(NoSuchElementException::new));
+                UserDb userDb = userOptional.get();
+                userDb.setName(user.name());
+                userDb.setDate(user.date());
+                usersDbRepository.save(userDb);
+                log.info("User details updated with user id:{}.",id);
         } catch (NoSuchElementException e) {
-            log.error("id doesn't exist, error:{}", e.getMessage());
-            throw new NoSuchElementException("Invalid id.");
+            log.error("user couldn't be updated since user with id:{} doesn't exist, error:{}",id, e.getMessage());
+            throw new NoSuchElementException(new StringBuilder("Invalid id:").append(id.toString()).toString());
         } catch (Throwable t) {
-            log.error("Error while updating user details, error:{}", t.getMessage());
+            log.error("Error while updating user details for user with id:{}, error:{}",id, t.getMessage());
             throw new RuntimeException("Error Occurred.");
         }
         return "Details Updated.";

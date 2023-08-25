@@ -1,24 +1,24 @@
 package com.rest.webservice.controller;
 
+import com.rest.webservice.dto.UserRequest;
 import com.rest.webservice.entity.UserDb;
-import com.rest.webservice.service.UsersDbService;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.sql.model.PreparableMutationOperation;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.rest.webservice.service.UserService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @RestController()
 @RequestMapping("/users-db")
-public class UsersDbController {
+@RequiredArgsConstructor
+@CrossOrigin(origins = {"http://localhost:8080"})
+public class UserController {
 
-    @Autowired
-    private UsersDbService usersDbService;
+    private final UserService usersDbService;
 
     @GetMapping("/all")
-    public ArrayList<UserDb> getAllUsers() {
+    public List<UserDb> getAllUsers() {
         return usersDbService.getAllUsers();
     }
 
@@ -37,8 +37,9 @@ public class UsersDbController {
         return usersDbService.deleteUser(id);
     }
 
-    @PatchMapping("/{id}")
-    public String updateUser(@PathVariable Integer id, @RequestBody UserDb user) {
+
+    @PutMapping("/{id}")
+    public String updateUser2(@PathVariable Integer id, @Valid @RequestBody UserRequest user) {
         return usersDbService.updateUser(id, user);
     }
 }
