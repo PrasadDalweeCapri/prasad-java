@@ -21,7 +21,7 @@ public class UsersDAOService {
 
     //making id thread safe: 3 ways-> Synchronized, Volatile, AtomicInteger
     //refer: https://www.geeksforgeeks.org/difference-between-atomic-volatile-and-synchronized-in-java/
-    private static AtomicInteger id=new AtomicInteger(0);
+    private static final AtomicInteger id=new AtomicInteger(0);
 
     public Integer getLastUserId(){return id.get();}
 
@@ -36,13 +36,18 @@ public class UsersDAOService {
         User targetUser = null;
         try
         {
-            return users.stream().filter(user -> user.getId().equals(id)).findFirst().get();
+            targetUser= users.stream().filter(user -> user.getId().equals(id)).findFirst().get();
+        }
+        catch (NoSuchElementException e)
+        {
+            log.error("The requested id:{} doesn't exist in users",id);
+            throw new NoSuchElementException("No user found");
         }
         catch (Throwable t)
         {
             log.error("Error while finding user with id:{}",id);
-            throw new NoSuchElementException("No user found");
         }
+        return targetUser;
     }
 
 
@@ -56,7 +61,7 @@ public class UsersDAOService {
         }
         catch (Throwable t)
         {
-            log.error("Error occured while adding user:"+user+t.getMessage());
+            log.error("Error occurred while adding user:{}, and the error is: {}",user,t.getMessage());
         }
     }
 
@@ -70,11 +75,11 @@ public class UsersDAOService {
         }
         catch (NoSuchElementException  e)
         {
-            log.error("The requested id:{} doesn't exist",id+e.getMessage());
+            log.error("The requested id:{} doesn't exist, and the error is:{}",id,e.getMessage());
         }
         catch (Throwable t)
         {
-            log.error("Error occured while deleting user with id:{}",id);
+            log.error("Error occurred while deleting user with id:{}",id);
         }
         return "Removal of user failed, provide correct data.";
     }
@@ -84,12 +89,12 @@ public class UsersDAOService {
         try {
             users.get(id).setName(user.getName());
             users.get(id).setDate(user.getDate());
-            log.info("User Created Successfully: " + users);
+            log.info("User Updated Successfully: {}", users);
             return "User Updated";
         }
         catch (Throwable t)
         {
-            log.error("error occurred when updating id:{}",user.getId()+t.getMessage());
+            log.error("error occurred when updating id:{}, and the error is: {}",user.getId(),t.getMessage());
         }
         return "Update Failed, input valid ID.";
     }

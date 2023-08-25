@@ -2,6 +2,8 @@ package com.rest.webservice.controller.versioning;
 
 
 import com.rest.webservice.entity.Version;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.NoSuchElementException;
 
 @RestController
+@Validated
 public class VersioningController {
 
     /**
@@ -31,11 +34,10 @@ public class VersioningController {
     //parameter based
     @GetMapping(value = "/fetch")
     public Version fetchByParam1(@RequestParam Integer version) {
-        if (version.equals(1)) {
-            return new Version(1, "Paramter Based Versioning");
+        if (version==1) {
+            return new Version(1, "Parameter Based Versioning");
         }
-
-        if (version.equals(2)) {
+        if (version==2) {
             return new Version(2, "Parameter Based Versioning");
         } else
             throw new NoSuchElementException("That version doesn't exist");
