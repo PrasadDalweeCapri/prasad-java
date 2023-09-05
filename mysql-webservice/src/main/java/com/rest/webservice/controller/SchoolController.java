@@ -30,8 +30,8 @@ public class SchoolController {
     //many:many bidirectional mapping: students->courses
 
     @PostMapping("/students")
-    public Student createStudents(@RequestBody Student student) {
-        return service.createStudents(student);
+    public Student createStudent(@RequestBody Student student) {
+        return service.createStudent(student);
     }
 
     @GetMapping("/students/all")
