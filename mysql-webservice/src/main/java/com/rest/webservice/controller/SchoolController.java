@@ -8,9 +8,9 @@ import com.rest.webservice.repository.CourseRepository;
 import com.rest.webservice.repository.LaptopRepository;
 import com.rest.webservice.repository.ProjectRepository;
 import com.rest.webservice.repository.StudentRepository;
+import com.rest.webservice.service.SchoolService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,36 +24,34 @@ public class SchoolController {
     private final LaptopRepository laptopRepository;
     private final ProjectRepository projectRepository;
     private final CourseRepository courseRepository;
-
+    private final SchoolService service;
     //1:1 bidirectional mapping: student->laptop
     //1:many bidirectional mapping: student->projects
     //many:many bidirectional mapping: students->courses
 
     @PostMapping("/students")
-    public ResponseEntity<String> createStudents(@RequestBody Student student) {
-        student.addProject(student.getProjects());  //forcefully saving, one:many has some issues
-        studentRepository.save(student);
-        return ResponseEntity.ok("Student added.");
+    public Student createStudents(@RequestBody Student student) {
+        return service.createStudents(student);
     }
 
     @GetMapping("/students/all")
     public List<Student> fetchAllStudents() {
-        return studentRepository.findAll();
+        return service.fetchAllStudents();
     }
 
     @GetMapping("/laptops/all")
-    public List<Laptop> getAllLaptops() {
-        return laptopRepository.findAll();
+    public List<Laptop> fetchAllLaptops() {
+        return service.fetchAllLaptops();
     }
 
     @GetMapping("/projects/all")
     public List<Project> fetchAllProjects() {
-        return projectRepository.findAll();
+        return service.fetchAllProjects();
     }
 
     @GetMapping("/courses/all")
     public List<Course> fetchAllCourses() {
-        return courseRepository.findAll();
+        return service.fetchAllCourses();
     }
 
 }
