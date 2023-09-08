@@ -25,7 +25,7 @@ public class SchoolService {
     private final CourseRepository courseRepository;
 
     public Student createStudent(@RequestBody Student student) {
-        student.addProject(student.getProjects());  //forcefully saving project entity as one:many has some issues
+        student.addProjects(student.getProjects());  //forcefully saving project entity as one:many has some issues
         Student newStudent;
         try {
             newStudent = studentRepository.save(student);

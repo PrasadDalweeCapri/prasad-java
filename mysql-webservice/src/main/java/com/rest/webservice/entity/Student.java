@@ -2,8 +2,13 @@ package com.rest.webservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -26,6 +31,10 @@ public class Student {
     private String name;
 
     private String bio;     //nullable==true is default
+
+    private LocalDate dob;
+
+    private Boolean active;
 
     //one to one mapping: unidirectional & bidirectional (parent ->child/associate)
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY) //default FetchType: EAGER
@@ -59,13 +68,11 @@ public class Student {
     private Set<Course> courses;
 
 
-    public void addProject(List<Project> projects) //adding forcefully
+    public void addProjects(@NotNull List<Project> projects) //adding forcefully
     {
-        this.projects=projects;
+        this.projects = projects;
         projects.forEach(project1 -> project1.setStudent(this));
     }
-
-
 }
 
 /*
