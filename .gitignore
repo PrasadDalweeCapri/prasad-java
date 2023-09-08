@@ -26,9 +26,11 @@ replay_pid*
 # Ignore folders
 /.idea/
 /target/
+/mysql-webservice/target
 
 #Ignore files
 /HELP.md
 
 #Do not Ignore
 !/src
+!/mysql-webservice/src

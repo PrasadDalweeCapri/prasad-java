@@ -2,10 +2,15 @@ package com.rest.webservice.controller;
 
 import com.rest.webservice.dto.SearchStudentNameDto;
 import com.rest.webservice.entity.Student;
+import com.rest.webservice.enums.FilterDateType;
+import com.rest.webservice.enums.FilterIdType;
+import com.rest.webservice.enums.SearchActiveType;
+import com.rest.webservice.enums.SearchBioType;
 import com.rest.webservice.service.StudentService;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,27 +38,28 @@ public class StudentController {
     }
 
     @GetMapping("/bio")
-    public List<Student> searchStudentsByBio(@RequestParam @NotNull String type, @RequestParam @NotBlank String bio) {
+    public List<Student> searchStudentsByBio(@RequestParam @NotNull SearchBioType type, @RequestParam @NotBlank String bio) {
         return studentService.searchBio(type, bio);
     }
 
     @GetMapping("/active")
-    public List<Student> searchByActive(@RequestParam @NotBlank String type) {
+    public List<Student> searchByActive(@RequestParam @NotNull SearchActiveType type) {
         return studentService.searchActive(type);
     }
 
     @GetMapping("/dob")
-    public List<Student> filterByDate(@RequestParam @NotNull LocalDate dob, @RequestParam @NotBlank String type) {
+    public List<Student> filterByDate(@RequestParam @NotNull @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dob,
+                                      @RequestParam @NotNull FilterDateType type) {
         return studentService.filterDate(dob, type);
     }
 
     @GetMapping("/student-id")
-    public List<Student> filterById(@RequestParam @NotNull Integer id, @RequestParam @NotBlank String type) {
+    public List<Student> filterById(@RequestParam @NotNull Integer id, @RequestParam @NotNull FilterIdType type) {
         return studentService.filterId(id, type);
     }
 
     @PostMapping("/student-id/collection")
-    public List<Student> filterByIdCollection(@RequestBody List<Integer> idCollection) {
+    public List<Student> filterByIdCollection(@RequestBody @NotNull List<Integer> idCollection) {
         return studentService.fiterIdCollection(idCollection);
     }
 

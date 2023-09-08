@@ -2,14 +2,16 @@ package com.rest.webservice.service;
 
 import com.rest.webservice.dto.SearchStudentNameDto;
 import com.rest.webservice.entity.Student;
+import com.rest.webservice.enums.*;
 import com.rest.webservice.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -29,30 +31,37 @@ public class StudentService {
     public List<Student> searchName(SearchStudentNameDto studentNameDto) {
         List<Student> result = null;
         String name = studentNameDto.name();
-        String type = studentNameDto.type();
-        String order = studentNameDto.order();
+        SearchNameType type = studentNameDto.type();
+        SearchNameOrder order = studentNameDto.order();
 
         try {
-            if (type == null || type.isBlank()) {
+            if (type == null) {
                 result = switch (order) {
-                    case "Desc" -> studentRepository.findByNameOrderByStudentIdDesc(name);
-                    case "Id" -> studentRepository.findByNameOrderByStudentId(name);
-                    default -> studentRepository.findByNameOrderByStudentIdAsc(name);   //Asc
+                    case DESC -> studentRepository.findByNameOrderByStudentIdDesc(name);
+                    case ASC -> studentRepository.findByNameOrderByStudentIdAsc(name);   //Asc
+                    case ID -> studentRepository.findByNameOrderByStudentId(name);
+                    default -> throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found.");
                 };
             } else {
                 result = switch (type) {
-                    case "IgnoreCase" -> studentRepository.findByNameIgnoreCase(name);
-                    case "StartingWith" -> studentRepository.findByNameStartingWith(name);
-                    case "EndingWith" -> studentRepository.findByNameEndingWith(name);
-                    case "Like" -> studentRepository.findByNameLike(name);
-                    case "Containing" -> studentRepository.findByNameContaining(name);
-                    default -> studentRepository.findByName(name);
+                    case IGNORECASE -> studentRepository.findByNameIgnoreCase(name);
+                    case STARTINGWITH -> studentRepository.findByNameStartingWith(name);
+                    case ENDINGWITH -> studentRepository.findByNameEndingWith(name);
+                    case LIKE -> studentRepository.findByNameLike(name);
+                    case CONTAINING -> studentRepository.findByNameContaining(name);
+                    case DEFAULT -> studentRepository.findByName(name);
+                    default -> throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Type not found.");
                 };
             }
+        } catch (ResponseStatusException r) {
+            log.error("Error occurred: {}", r.getReason());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, r.getReason());
         } catch (Throwable t) {
             log.error("Error occurred while searching Student-Name. Request:{}, Error:{}", studentNameDto, t.getMessage());
             throw new RuntimeException("Error Occurred");
         }
+        if (result.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT);
         return result;
     }
 
@@ -62,22 +71,24 @@ public class StudentService {
         type: Null, NotNUll, IsNot
         bio: targetBio
      */
-    public List<Student> searchBio(String type, String targetBio) {
+    public List<Student> searchBio(SearchBioType type, String targetBio) {
         List<Student> result = null;
         try {
             result = switch (type) {
-                case "Null" -> studentRepository.findByBioIsNull();
-                case "NotNull" -> studentRepository.findByBioIsNotNull();
-                case "IsNot" -> studentRepository.findByBioIsNot(targetBio);
-                default -> throw new NoSuchElementException();
+                case NULL -> studentRepository.findByBioIsNull();
+                case NOTNULL -> studentRepository.findByBioIsNotNull();
+                case ISNOT -> studentRepository.findByBioIsNot(targetBio);
+                default -> throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Type not found.");
             };
-        } catch (NoSuchElementException e) {
-            log.error("Type={} doesn't exist.", type);
-            throw new NoSuchElementException("Requested type doesn't exist. Supported Types: {Null, NotNull, IsNot}.");
+        } catch (ResponseStatusException r) {
+            log.error("Error occurred: {}", r.getReason());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, r.getReason());
         } catch (Throwable t) {
             log.error("Error occurred while searching Student-Bio for Type={}. Error:{}", type, t.getMessage());
             throw new RuntimeException("Error Occurred.");
         }
+        if (result.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT);
         return result;
     }
 
@@ -85,21 +96,23 @@ public class StudentService {
     This method searches for boolean field active
     type: true,false
      */
-    public List<Student> searchActive(String type) {
+    public List<Student> searchActive(SearchActiveType type) {
         List<Student> result = null;
         try {
             result = switch (type) {
-                case "true" -> studentRepository.findByActiveTrue();
-                case "false" -> studentRepository.findByActiveFalse();
-                default -> throw new NoSuchElementException();
+                case TRUE -> studentRepository.findByActiveTrue();
+                case FALSE -> studentRepository.findByActiveFalse();
+                default -> throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Type not found.");
             };
-        } catch (NoSuchElementException e) {
-            log.error("Type={} doesn't exist.", type);
-            throw new NoSuchElementException("Requested type doesn't exist. Supported Types: {true, false}.");
+        } catch (ResponseStatusException r) {
+            log.error("Error occurred: {}", r.getReason());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, r.getReason());
         } catch (Throwable t) {
             log.error("Error occurred while searching Student-Active for Type={}. Error:{}", type, t.getMessage());
             throw new RuntimeException("Error Occurred.");
         }
+        if (result.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT);
         return result;
     }
 
@@ -108,21 +121,23 @@ public class StudentService {
     dob: LocalDate
     type: Before,After
      */
-    public List<Student> filterDate(LocalDate dob, String type) {
+    public List<Student> filterDate(LocalDate dob, FilterDateType type) {
         List<Student> result = null;
         try {
             result = switch (type) {
-                case "Before" -> studentRepository.findByDobBefore(dob);
-                case "After" -> studentRepository.findByDobAfter(dob);
-                default -> throw new NoSuchElementException();
+                case BEFORE -> studentRepository.findByDobBefore(dob);
+                case AFTER -> studentRepository.findByDobAfter(dob);
+                default -> throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Type not found.");
             };
-        } catch (NoSuchElementException e) {
-            log.error("Type={} doesn't exist.", type);
-            throw new NoSuchElementException("Requested type doesn't exist. Supported Types: {Before, After}.");
+        } catch (ResponseStatusException r) {
+            log.error("Error occurred: {}", r.getReason());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, r.getReason());
         } catch (Throwable t) {
             log.error("Error occurred while searching Student-Dob for Type={}. Error:{}", type, t.getMessage());
             throw new RuntimeException("Error Occurred.");
         }
+        if (result.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT);
         return result;
     }
 
@@ -131,25 +146,28 @@ public class StudentService {
     id: studentId
     type: GreaterThan, LessThan, GreaterThanEquals, LessThanEquals
      */
-    public List<Student> filterId(Integer id, String type) {
+    public List<Student> filterId(Integer id, FilterIdType type) {
         List<Student> result = null;
         try {
             result = switch (type) {
-                case "GreaterThan" -> studentRepository.findByStudentIdGreaterThan(id);
-                case "GreaterThanEqual" -> studentRepository.findByStudentIdGreaterThanEqual(id);
-                case "LessThan" -> studentRepository.findByStudentIdLessThan(id);
-                case "LessThanEqual" -> studentRepository.findByStudentIdLessThanEqual(id);
-                default -> throw new NoSuchElementException();
+                case GREATERTHAN -> studentRepository.findByStudentIdGreaterThan(id);
+                case GREATERTHANEQUAL -> studentRepository.findByStudentIdGreaterThanEqual(id);
+                case LESSTHAN -> studentRepository.findByStudentIdLessThan(id);
+                case LESSTHANEQUAL -> studentRepository.findByStudentIdLessThanEqual(id);
+                default -> throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Type not found.");
             };
-        } catch (NoSuchElementException e) {
-            log.error("Type={} doesn't exist.", type);
-            throw new NoSuchElementException("Requested type doesn't exist. Supported Types: {GreaterThan, LessThan, GreaterThanEquals, LessThanEquals}.");
+        } catch (ResponseStatusException r) {
+            log.error("Error occurred: {}", r.getReason());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, r.getReason());
         } catch (Throwable t) {
             log.error("Error occurred while searching Student-StudentId for Type={}. Error:{}", type, t.getMessage());
             throw new RuntimeException("Error Occurred.");
         }
+        if (result.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT);
         return result;
     }
+
     /*
        This method filters by studentID with a collection
        idCollection: Collection of studentIds to be matched
@@ -157,11 +175,13 @@ public class StudentService {
     public List<Student> fiterIdCollection(List<Integer> idCollection) {
         List<Student> result = null;
         try {
-            result=studentRepository.findByStudentIdIn(idCollection);
+            result = studentRepository.findByStudentIdIn(idCollection);
         } catch (Throwable t) {
-            log.error("Error occurred while searching Student-Id in Collection={}. Error:{}",idCollection, t.getMessage());
+            log.error("Error occurred while searching Student-Id in Collection={}. Error:{}", idCollection, t.getMessage());
             throw new RuntimeException("Error Occurred.");
         }
+        if (result.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT);
         return result;
     }
 
@@ -174,11 +194,13 @@ public class StudentService {
     public List<Student> filterIdRange(Integer start, Integer end) {
         List<Student> result = null;
         try {
-            result=studentRepository.findByStudentIdBetween(start,end);
+            result = studentRepository.findByStudentIdBetween(start, end);
         } catch (Throwable t) {
-            log.error("Error occurred while searching Student-Id in Range=[{},{}]. Error:{}",start,end, t.getMessage());
+            log.error("Error occurred while searching Student-Id in Range=[{},{}]. Error:{}", start, end, t.getMessage());
             throw new RuntimeException("Error Occurred.");
         }
+        if (result.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT);
         return result;
     }
 }
